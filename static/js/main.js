@@ -164,6 +164,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             excelPath = data.excel_path;
+            
+            // 테스트 케이스 미리보기 생성
+            if (data.test_cases && Array.isArray(data.test_cases)) {
+                createPreviewTable(data.test_cases);
+            }
+            
             progressBar.style.width = '100%';
             progressStatus.textContent = '테스트 케이스 생성 완료!';
             
@@ -177,6 +183,43 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('테스트 케이스 생성 중 오류가 발생했습니다: ' + error.message);
         });
     });
+    
+    // 테스트 케이스 미리보기 테이블 생성 함수 추가
+    function createPreviewTable(testCases) {
+        const tableBody = document.getElementById('previewTableBody');
+        tableBody.innerHTML = ''; // 기존 내용 제거
+        
+        // 열 데이터 정의를 함수 상단으로 이동
+        const columns = ['TID', '대분류', '중분류', '소분류', 'Precondition', 'Test_Step', 'Expected_Result'];
+        
+        // 최대 10개까지만 표시
+        const casesToShow = testCases.slice(0, 10);
+        
+        casesToShow.forEach(tc => {
+            const row = document.createElement('tr');
+            
+            // 각 열 데이터 추가
+            columns.forEach(col => {
+                const cell = document.createElement('td');
+                // 줄바꿈을 <br>로 변환
+                cell.innerHTML = tc[col] ? tc[col].replace(/\n/g, '<br>') : '';
+                row.appendChild(cell);
+            });
+            
+            tableBody.appendChild(row);
+        });
+        
+        // 테스트 케이스가 10개 이상이면 안내 메시지 추가
+        if (testCases.length > 10) {
+            const infoRow = document.createElement('tr');
+            const infoCell = document.createElement('td');
+            infoCell.colSpan = columns.length;  // 이제 columns에 접근 가능
+            infoCell.className = 'text-center text-muted';
+            infoCell.textContent = `... 그 외 ${testCases.length - 10}개의 테스트 케이스가 더 있습니다. 전체 내용은 Excel 파일을 확인하세요.`;
+            infoRow.appendChild(infoCell);
+            tableBody.appendChild(infoRow);
+        }
+    }
     
     // 다운로드 처리
     downloadBtn.addEventListener('click', () => {

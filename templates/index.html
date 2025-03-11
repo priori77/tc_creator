@@ -11,6 +11,7 @@
         <header>
             <h1>게임 테스트 케이스 생성기</h1>
             <p>기획서 PDF 파일을 업로드하여 테스트 케이스를 자동으로 생성하세요.</p>
+            <p class="small-notice"><small>※ 주의: 텍스트를 추출할 수 있는 PDF 파일만 지원됩니다. 이미지 형태의 PDF는 정상 처리되지 않을 수 있습니다.</small></p>
         </header>
         
         <main>
@@ -24,6 +25,7 @@
                         </svg>
                     </div>
                     <p>PDF 파일을 여기에 드래그하거나 클릭하여 업로드하세요</p>
+                    <P>(업로드 가능한 최대 파일 크기는 16MB입니다.)</P>
                     <input type="file" id="fileInput" accept=".pdf" hidden>
                 </div>
                 
@@ -46,10 +48,53 @@
             </section>
             
             <section class="result-section" id="resultSection" style="display: none;">
-                <div class="result-container">
-                    <h2>테스트 케이스 생성 완료!</h2>
-                    <p>생성된 테스트 케이스를 Excel 파일로 다운로드할 수 있습니다.</p>
-                    <button id="downloadBtn" class="btn-primary">Excel 다운로드</button>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>테스트 케이스 생성 완료!</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- 미리보기 탭 추가 -->
+                        <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="preview-tab" data-toggle="tab" href="#preview" role="tab">미리보기</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="download-tab" data-toggle="tab" href="#download" role="tab">다운로드</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="resultTabContent">
+                            <!-- 미리보기 탭 내용 -->
+                            <div class="tab-pane fade show active" id="preview" role="tabpanel">
+                                <div class="preview-container">
+                                    <div class="alert alert-info">생성된 테스트 케이스 미리보기 (최대 10개)</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped" id="previewTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>TID</th>
+                                                    <th>대분류</th>
+                                                    <th>중분류</th>
+                                                    <th>소분류</th>
+                                                    <th>Precondition</th>
+                                                    <th>Test_Step</th>
+                                                    <th>Expected_Result</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="previewTableBody">
+                                                <!-- 여기에 동적으로 테스트 케이스가 표시됩니다 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p><small>* Excel 파일에서 모든 테스트 케이스를 확인할 수 있습니다.</small></p>
+                                </div>
+                            </div>
+                            <!-- 다운로드 탭 내용 -->
+                            <div class="tab-pane fade" id="download" role="tabpanel">
+                                <p>테스트 케이스가 Excel 파일로 생성되었습니다. 아래 버튼을 클릭하여 다운로드하세요.</p>
+                                <button id="downloadBtn" class="btn btn-primary">Excel 파일 다운로드</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
             
@@ -63,10 +108,12 @@
         </main>
         
         <footer>
-            <p>&copy; 2023 게임 테스트 케이스 생성기</p>
+            <p>&copy; 2025 LLM 기반 TC 생성기 - 서준석</p>
         </footer>
     </div>
     
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

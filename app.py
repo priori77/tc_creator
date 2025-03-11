@@ -63,7 +63,12 @@ def generate():
         # Excel 파일 생성
         excel_path = generate_excel(test_cases)
         
-        return jsonify({'success': True, 'excel_path': excel_path})
+        # 테스트 케이스 데이터와 Excel 경로 모두 반환
+        return jsonify({
+            'success': True, 
+            'excel_path': excel_path,
+            'test_cases': test_cases  # 테스트 케이스 데이터 추가
+        })
     except Exception as e:
         return jsonify({'error': f'테스트 케이스 생성 중 오류 발생: {str(e)}'}), 500
 

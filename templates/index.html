@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 테스트 케이스 생성기</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>게임 테스트 케이스 생성기</h1>
+            <p>기획서 PDF 파일을 업로드하여 테스트 케이스를 자동으로 생성하세요.</p>
+        </header>
+        
+        <main>
+            <section class="upload-section">
+                <div class="upload-container" id="dropArea">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <p>PDF 파일을 여기에 드래그하거나 클릭하여 업로드하세요</p>
+                    <input type="file" id="fileInput" accept=".pdf" hidden>
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-details">
+                        <span id="fileName"></span>
+                        <button id="removeFile" class="btn-remove">삭제</button>
+                    </div>
+                    <button id="generateBtn" class="btn-primary">테스트 케이스 생성</button>
+                </div>
+            </section>
+            
+            <section class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                    <p id="progressStatus">처리 중...</p>
+                </div>
+            </section>
+            
+            <section class="result-section" id="resultSection" style="display: none;">
+                <div class="result-container">
+                    <h2>테스트 케이스 생성 완료!</h2>
+                    <p>생성된 테스트 케이스를 Excel 파일로 다운로드할 수 있습니다.</p>
+                    <button id="downloadBtn" class="btn-primary">Excel 다운로드</button>
+                </div>
+            </section>
+            
+            <section class="error-section" id="errorSection" style="display: none;">
+                <div class="error-container">
+                    <h2>오류 발생</h2>
+                    <p id="errorMessage"></p>
+                    <button id="retryBtn" class="btn-primary">다시 시도</button>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2023 게임 테스트 케이스 생성기</p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

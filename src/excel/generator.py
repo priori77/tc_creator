@@ -13,8 +13,8 @@ def generate_excel(test_cases, output_path=None):
     Returns:
         str: 생성된 Excel 파일 경로
     """
-    # 출력 디렉토리 설정 (Vercel 환경에서는 /tmp 사용)
-    output_dir = '/tmp/output'
+    # 출력 디렉토리 생성
+    output_dir = 'output'
     os.makedirs(output_dir, exist_ok=True)
     
     # 출력 파일 경로 설정

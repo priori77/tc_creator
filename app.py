@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_file
+from flask_cors import CORS  # CORS 지원 추가
 import os
 from src.pdf_processor.extractor import extract_text_from_pdf
 from src.llm.openai_client import generate_test_cases
@@ -6,6 +7,7 @@ from src.excel.generator import generate_excel
 from src.llm.example_loader import load_examples
 
 app = Flask(__name__)
+CORS(app)  # CORS 설정 추가
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB 제한
 
@@ -18,25 +20,28 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': '파일이 없습니다'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': '선택된 파일이 없습니다'}), 400
-    
-    if not file.filename.endswith('.pdf'):
-        return jsonify({'error': 'PDF 파일만 업로드 가능합니다'}), 400
-    
-    # 파일 저장
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(file_path)
-    
-    # PDF에서 텍스트 추출
     try:
+        if 'file' not in request.files:
+            return jsonify({'error': '파일이 없습니다'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': '선택된 파일이 없습니다'}), 400
+        
+        if not file.filename.endswith('.pdf'):
+            return jsonify({'error': 'PDF 파일만 업로드 가능합니다'}), 400
+        
+        # 파일 저장
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
+        
+        # PDF에서 텍스트 추출
         extracted_text = extract_text_from_pdf(file_path)
         return jsonify({'success': True, 'text': extracted_text, 'file_path': file_path})
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"오류 발생: {error_details}")
         return jsonify({'error': f'PDF 처리 중 오류 발생: {str(e)}'}), 500
 
 @app.route('/generate', methods=['POST'])

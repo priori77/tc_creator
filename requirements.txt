@@ -1,5 +1,6 @@
 flask==2.3.3
-pymupdf==1.23.7
+flask-cors==4.0.0
+PyPDF2==3.0.1
 pandas==2.1.1
 xlsxwriter==3.1.9
 openai==0.28.1

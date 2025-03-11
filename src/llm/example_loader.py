@@ -9,12 +9,24 @@ def load_examples():
         list: 테스트 케이스 예시 목록
     """
     try:
-        # 프로젝트 루트 디렉토리 기준 상대 경로
-        example_path = os.path.join('data', 'examples', 'test_cases.json')
+        # 다양한 가능한 경로 시도
+        possible_paths = [
+            os.path.join('data', 'examples', 'test_cases.json'),  # 원래 경로
+            'tc_cases.json',  # 루트 경로
+            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'tc_cases.json')  # 절대 경로 계산
+        ]
         
-        # 파일이 없으면 tc_cases.json 사용
-        if not os.path.exists(example_path):
-            example_path = 'tc_cases.json'
+        # 존재하는 첫 번째 파일 사용
+        example_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                example_path = path
+                print(f"테스트 케이스 예시 파일을 찾았습니다: {path}")
+                break
+        
+        if example_path is None:
+            print("경고: 테스트 케이스 예시 파일을 찾을 수 없습니다. 기본 예시를 사용합니다.")
+            raise FileNotFoundError("테스트 케이스 예시 파일을 찾을 수 없습니다")
         
         with open(example_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -30,15 +42,15 @@ def load_examples():
         # 기본 예시 반환
         return [
             {
-                "TID": "ITEM_001",
-                "대분류": "NPC\n(공통)",
-                "중분류": "리스트",
-                "소분류": "M0.2 스펙",
-                "Precondition": "1. 라운지에 진입한 상태",
-                "Test_Step": "1. 인게임 내 NPC 스폰 확인",
-                "Expected_Result": "라운지 내 무기 상인 NPC가 존재한다.",
-                "Result": "",
-                "BTS_Key": "",
-                "Comment": ""
+            "TID": "GEM_001",
+            "대분류": "재화",
+            "중분류": "다이아",
+            "소분류": "아이콘",
+            "Precondition": "게임 로비 화면 상태",
+            "Test_Step": "다이아 아이콘 터치",
+            "Expected_Result": "다이아 상세 정보 팝업창이 출력 됨",
+            "Result": "Not Test",
+            "BTS_Key": "",
+            "Comment": ""
             }
-        ] 
+        ]

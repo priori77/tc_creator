@@ -1,1 +1,28 @@
-tc_case.json
+tc_cases.json
+
+# 환경 변수 파일
+.env
+
+# 업로드된 파일
+uploads/
+output/
+
+# Python 캐시 파일
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상 환경
+venv/
+env/
+ENV/
+
+# IDE 파일
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 기타 임시 파일
+*.log
+.DS_Store

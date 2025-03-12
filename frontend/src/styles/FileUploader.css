@@ -1,0 +1,27 @@
+.dropzone {
+  border: 2px dashed #cccccc;
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+  background-color: #f0f4ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dropzone.active {
+  border-color: #4a6bff;
+  background-color: #e8eeff;
+}
+
+.upload-icon {
+  color: #4a6bff;
+  margin-bottom: 1rem;
+}
+
+.upload-section {
+  margin-bottom: 2rem;
+}
+
+.file-info {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+} 

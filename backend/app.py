@@ -18,13 +18,17 @@ for dotenv_path in dotenv_paths:
         load_dotenv(dotenv_path)
         break
 
-# OpenAI API 키 직접 설정
-api_key = os.getenv("OPENAI_API_KEY")
+# Config 클래스를 먼저 임포트 (중요!)
+from src.utils.config import Config
+
+# 앱 초기화 시 설정 확인 (Config 클래스 초기화)
+Config.init_app()
+
+# OpenAI API 키 설정
+api_key = os.getenv("OPENAI_API_KEY") or Config.OPENAI_API_KEY
 if api_key:
     print(f"API 키 설정 완료: {api_key[:10]}...")
-    # 새 버전 API 키 설정 방식
     openai.api_key = api_key
-    # 기존 클래스 생성자 방식으로도 설정 (새 버전 대비)
     try:
         openai_client = openai.OpenAI(api_key=api_key)
         print("OpenAI 클라이언트 초기화 성공")
@@ -36,22 +40,26 @@ else:
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-# 기존 import 유지
 
 app = Flask(__name__)
-CORS(app)  # CORS 설정 - 중요!
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB 제한
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # CORS 설정 강화
+
+# 환경 변수에서 설정 로드 (Config 클래스 사용)
+upload_folder = Config.UPLOAD_FOLDER if hasattr(Config, 'UPLOAD_FOLDER') else 'uploads'
+max_content_length = Config.MAX_CONTENT_LENGTH if hasattr(Config, 'MAX_CONTENT_LENGTH') else 16 * 1024 * 1024
+
+# 상대 경로 대신 절대 경로 사용
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), upload_folder)
+app.config['MAX_CONTENT_LENGTH'] = int(max_content_length)
+
+print(f"파일 업로드 설정:")
+print(f"- 업로드 폴더: {app.config['UPLOAD_FOLDER']}")
+print(f"- 최대 파일 크기: {app.config['MAX_CONTENT_LENGTH']/1024/1024:.1f}MB")
 
 # 업로드 폴더가 없으면 생성
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-from src.utils.config import Config
-
-# 앱 초기화 시 설정 확인
-Config.init_app()
-
-# API 키 상태 확인 (하드코딩 제거)
+# API 키 상태 확인
 print(f"현재 OPENAI_API_KEY 환경 변수: {'설정됨' if os.environ.get('OPENAI_API_KEY') else '설정되지 않음'}")
 
 # API 키가 없으면 경고만 표시
@@ -62,39 +70,62 @@ if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY in ["your_api_key_here", "
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
     try:
+        print("=== 파일 업로드 요청 시작 ===")
+        
         if 'file' not in request.files:
+            print("오류: 요청에 'file' 필드가 없습니다")
             return jsonify({'error': '파일이 없습니다'}), 400
         
         file = request.files['file']
         print(f"업로드된 파일: {file.filename}, 타입: {file.content_type}")
         
         if file.filename == '':
+            print("오류: 선택된 파일 없음")
             return jsonify({'error': '선택된 파일이 없습니다'}), 400
         
-        if not file.filename.endswith('.pdf'):
+        if not file.filename.lower().endswith('.pdf'):
+            print(f"오류: PDF 파일이 아님 ({file.filename})")
             return jsonify({'error': 'PDF 파일만 업로드 가능합니다'}), 400
         
-        # 파일 저장
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        print(f"파일 저장됨: {file_path}")
+        try:
+            # 파일 저장 시도
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            print(f"파일 성공적으로 저장됨: {file_path}")
+            
+            # 파일 크기 확인
+            file_size = os.path.getsize(file_path)
+            print(f"파일 크기: {file_size/1024/1024:.2f}MB")
+            
+            if file_size > app.config['MAX_CONTENT_LENGTH']:
+                os.remove(file_path)  # 초과 크기 파일 삭제
+                print(f"파일 크기 초과: {file_size/1024/1024:.2f}MB > {app.config['MAX_CONTENT_LENGTH']/1024/1024:.2f}MB")
+                return jsonify({'error': f'파일 크기가 {app.config["MAX_CONTENT_LENGTH"]/1024/1024:.1f}MB를 초과합니다'}), 413
+            
+        except Exception as e:
+            print(f"파일 저장 오류: {e}")
+            return jsonify({'error': f'파일 저장 중 오류 발생: {str(e)}'}), 500
         
-        # PDF에서 텍스트 추출
-        import src.pdf_processor.extractor as extractor
-        print("PDF 텍스트 추출 시작...")
-        extracted_text = extractor.extract_text_from_pdf(file_path)
+        # PDF에서 텍스트 추출 시도
+        try:
+            import src.pdf_processor.extractor as extractor
+            print("PDF 텍스트 추출 시작...")
+            extracted_text = extractor.extract_text_from_pdf(file_path)
+            
+            # 추출된 텍스트 확인
+            if extracted_text:
+                preview = extracted_text[:200] + "..." if len(extracted_text) > 200 else extracted_text
+                print(f"텍스트 추출 성공 (일부): {preview}")
+            else:
+                print("추출된 텍스트 없음")
+                return jsonify({'error': 'PDF에서 텍스트를 추출할 수 없습니다. 텍스트 기반 PDF인지 확인하세요.'}), 400
+            
+        except Exception as e:
+            print(f"텍스트 추출 오류: {e}")
+            return jsonify({'error': f'PDF 텍스트 추출 중 오류 발생: {str(e)}'}), 500
         
-        # 추출된 텍스트 일부 출력 (디버깅용)
-        if extracted_text:
-            preview = extracted_text[:200] + "..." if len(extracted_text) > 200 else extracted_text
-            print(f"텍스트 추출 결과 (일부): {preview}")
-        else:
-            print("추출된 텍스트 없음")
-        
-        if not extracted_text or extracted_text.strip() == '':
-            return jsonify({'error': 'PDF에서 텍스트를 추출할 수 없습니다. 텍스트 기반 PDF인지 확인하세요.'}), 400
-        
+        print("=== 파일 업로드 요청 성공 ===")
         return jsonify({
             'success': True, 
             'text': extracted_text, 
@@ -103,7 +134,7 @@ def upload_file():
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
-        print(f"PDF 처리 중 오류 발생: {error_details}")
+        print(f"전체 처리 중 예외 발생: {error_details}")
         return jsonify({'error': f'PDF 처리 중 오류 발생: {str(e)}'}), 500
 
 @app.route('/api/generate', methods=['POST'])

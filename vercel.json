@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     },
     {
       "src": "package.json",
@@ -16,18 +19,24 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "dest": "api/index.py",
+      "headers": {
+        "Cache-Control": "no-cache, no-store"
+      }
     },
     {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/((?!api/.*).*)",
+      "dest": "/index.html"
     }
   ],
   "env": {
     "OPENAI_API_KEY": "@openai_api_key",
     "OPENAI_MODEL": "o3-mini",
-    "UPLOAD_FOLDER": "uploads",
+    "UPLOAD_FOLDER": "/tmp/uploads",
     "MAX_CONTENT_LENGTH": "16777216",
-    "OUTPUT_FOLDER": "output"
+    "OUTPUT_FOLDER": "/tmp/output"
   }
 } 

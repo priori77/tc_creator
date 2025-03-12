@@ -130,7 +130,7 @@ def generate():
 
 @app.route('/api/download/<path:filename>', methods=['GET'])
 def download(filename):
-    # 서버리스 환경에서는 /tmp 경로 사용
+    # 서버리스 환경에서는 /tmp 경로 확인
     if not filename.startswith('/tmp/'):
         filename = os.path.join('/tmp', filename)
     return send_file(filename, as_attachment=True)

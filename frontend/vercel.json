@@ -33,7 +33,7 @@
     }
   ],
   "env": {
-    "OPENAI_API_KEY": "@openai_api_key",
+    "OPENAI_API_KEY": "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",
     "OPENAI_MODEL": "o3-mini",
     "UPLOAD_FOLDER": "/tmp/uploads",
     "MAX_CONTENT_LENGTH": "16777216",

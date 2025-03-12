@@ -26,3 +26,4 @@ ENV/
 # 기타 임시 파일
 *.log
 .DS_Store
+.vercel

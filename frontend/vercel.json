@@ -31,12 +31,5 @@
       "src": "/((?!api/.*).*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "OPENAI_API_KEY": "@openai_api_key",
-    "OPENAI_MODEL": "o3-mini",
-    "UPLOAD_FOLDER": "/tmp/uploads",
-    "MAX_CONTENT_LENGTH": "16777216",
-    "OUTPUT_FOLDER": "/tmp/output"
-  }
+  ]
 }

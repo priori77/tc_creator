@@ -2,6 +2,7 @@ tc_cases.json
 
 # 환경 변수 파일
 .env
+.venv/
 
 # 업로드된 파일
 uploads/
